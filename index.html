@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Article Writer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        h1 {
+            font-size: 2rem;
+        }
+        
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .write-btn, .signup-btn, .earn-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        
+        .write-btn:hover, .signup-btn:hover, .earn-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .write-btn:disabled, .earn-btn:disabled {
+            background: rgba(255, 255, 255, 0.1);
+            cursor: not-allowed;
+        }
+        
+        .form-container {
+            padding: 30px;
+            display: none;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+        }
+        
+        input[type="text"], input[type="email"], input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            min-height: 200px;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+        
+        textarea:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: 600;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .articles-section {
+            padding: 30px;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #444;
+            font-size: 1.8rem;
+        }
+        
+        .article {
+            background: #f9f9f9;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 0 5px 5px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .article:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .article-title {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.4rem;
+        }
+        
+        .article-content {
+            color: #555;
+            line-height: 1.7;
+        }
+        
+        .article-content-preview {
+            max-height: 100px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .article-content-preview:after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: linear-gradient(to bottom, rgba(249, 249, 249, 0), rgba(249, 249, 249, 1));
+        }
+        
+        .article-meta {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #888;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #888;
+        }
+        
+        .empty-state p {
+            margin-top: 10px;
+        }
+        
+        .back-btn {
+            margin-bottom: 20px;
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .back-btn:hover {
+            background: #e0e0e0;
+        }
+        
+        .full-article-view {
+            padding: 30px;
+            display: none;
+        }
+        
+        .full-article-title {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .full-article-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #444;
+            white-space: pre-wrap;
+        }
+        
+        .full-article-meta {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #888;
+            font-size: 0.9rem;
+        }
+        
+        .stats-section {
+            background: #eef2ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .stats-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #444;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .earn-section {
+            background: #fff8e6;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+            border: 2px dashed #ffc107;
+        }
+        
+        .earn-title {
+            font-size: 1.3rem;
+            color: #444;
+            margin-bottom: 15px;
+        }
+        
+        .earn-content {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .email-display {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #667eea;
+            background: #f0f4ff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: inline-block;
+            margin: 15px 0;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .email-display:hover {
+            background: #e0e8ff;
+        }
+        
+        .copy-message {
+            font-size: 0.9rem;
+            color: #4caf50;
+            margin-top: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: #888;
+        }
+        
+        .close-btn:hover {
+            color: #333;
+        }
+        
+        .switch-form {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+        }
+        
+        .switch-form a {
+            color: #667eea;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+        
+        .progress-text {
+            font-size: 0.9rem;
+            color: #666;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Article Writer</h1>
+            <div class="auth-buttons">
+                <button class="signup-btn" id="signupBtn">Sign Up</button>
+                <button class="write-btn" id="writeBtn" disabled>Write Article</button>
+                <button class="earn-btn" id="earnBtn" disabled>Earn</button>
+            </div>
+        </header>
+        
+        <div class="form-container" id="formContainer">
+            <button class="back-btn" id="backBtn">← Back to Articles</button>
+            <h2>Write Your Article</h2>
+            <div class="stats-section">
+                <h3 class="stats-title">Your Article Statistics</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalViews">0</div>
+                        <div class="stat-label">Total Views</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalTime">0</div>
+                        <div class="stat-label">Total Time (seconds)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalArticles">0</div>
+                        <div class="stat-label">Articles Published</div>
+                    </div>
+                </div>
+                
+                <div class="progress-section" style="margin-top: 20px;">
+                    <h4>Unlock "Earn" Button Progress for $0.30</h4>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">$0.00 / $0.30</div>
+                </div>
+            </div>
+            <div class="form-group" style="margin-top: 30px;">
+                <label for="title">Article Title</label>
+                <input type="text" id="title" placeholder="Enter a compelling title for your article">
+            </div>
+            
+            <div class="form-group">
+                <label for="content">Article Content</label>
+                <textarea id="content" placeholder="Write your article content here..."></textarea>
+            </div>
+            
+            <button id="submitBtn">Publish Article</button>
+        </div>
+        
+        <div class="articles-section" id="articlesSection">
+            <h2 class="section-title">Published Articles</h2>
+            <div id="articlesContainer">
+                <div class="empty-state">
+                    <h3>No articles yet</h3>
+                    <p>Be the first to publish an article! Sign up to get started.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="full-article-view" id="fullArticleView">
+            <button class="back-btn" id="backToArticlesBtn">← Back to Articles</button>
+            <h2 class="full-article-title" id="fullArticleTitle"></h2>
+            <div class="full-article-content" id="fullArticleContent"></div>
+            <div class="full-article-meta" id="fullArticleMeta"></div>
+        </div>
+    </div>
+    
+    <!-- Earn Modal -->
+    <div class="modal" id="earnModal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeEarnModal">&times;</span>
+            <h2 class="modal-title">Congratulations! You've Unlocked Earnings</h2>
+            <div class="earn-section">
+                <h3 class="earn-title">Your Earnings Information</h3>
+                <p class="earn-content">You've reached the required $0.30 threshold across all your articles.</p>
+                <p class="earn-content">To claim your earnings, please copy the email below and contact us with your statistics:</p>
+                <div class="email-display" id="userEmailDisplay">p11328995@gmail.com</div>
+                <div class="copy-message" id="copyMessage">Email copied to clipboard!</div>
+                <p class="earn-content">Include a screenshot of your view and time statistics when emailing us.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Signup/Login Modal -->
+    <div class="modal" id="authModal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeModal">&times;</span>
+            <h2 class="modal-title" id="modalTitle">Sign Up</h2>
+            <div class="form-group">
+                <label for="authName">Name</label>
+                <input type="text" id="authName" placeholder="Enter your name">
+            </div>
+            <div class="form-group">
+                <label for="authEmail">Email</label>
+                <input type="email" id="authEmail" placeholder="Enter your email">
+            </div>
+            <div class="form-group">
+                <label for="authPassword">Password</label>
+                <input type="password" id="authPassword" placeholder="Enter your password">
+            </div>
+            <button id="authSubmitBtn">Sign Up</button>
+            <div class="switch-form">
+                Already have an account? <a id="switchToLogin">Login instead</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data (in a real app, this would come from a server)
+        let articles = [];
+        let users = [];
+        let currentUser = null;
+        let currentArticle = null;
+        let startTime = null;
+        let earningsClaimed = false; // Track if earnings have been claimed
+        
+        // DOM Elements
+        const signupBtn = document.getElementById('signupBtn');
+        const writeBtn = document.getElementById('writeBtn');
+        const earnBtn = document.getElementById('earnBtn');
+        const backBtn = document.getElementById('backBtn');
+        const backToArticlesBtn = document.getElementById('backToArticlesBtn');
+        const formContainer = document.getElementById('formContainer');
+        const articlesSection = document.getElementById('articlesSection');
+        const fullArticleView = document.getElementById('fullArticleView');
+        const titleInput = document.getElementById('title');
+        const contentInput = document.getElementById('content');
+        const submitBtn = document.getElementById('submitBtn');
+        const articlesContainer = document.getElementById('articlesContainer');
+        const fullArticleTitle = document.getElementById('fullArticleTitle');
+        const fullArticleContent = document.getElementById('fullArticleContent');
+        const fullArticleMeta = document.getElementById('fullArticleMeta');
+        const authModal = document.getElementById('authModal');
+        const earnModal = document.getElementById('earnModal');
+        const closeModal = document.getElementById('closeModal');
+        const closeEarnModal = document.getElementById('closeEarnModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const authName = document.getElementById('authName');
+        const authEmail = document.getElementById('authEmail');
+        const authPassword = document.getElementById('authPassword');
+        const authSubmitBtn = document.getElementById('authSubmitBtn');
+        const switchToLogin = document.getElementById('switchToLogin');
+        const totalViews = document.getElementById('totalViews');
+        const totalTime = document.getElementById('totalTime');
+        const totalArticles = document.getElementById('totalArticles');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        const userEmailDisplay = document.getElementById('userEmailDisplay');
+        const copyMessage = document.getElementById('copyMessage');
+        
+        // Load data from localStorage if available
+        function loadData() {
+            const savedArticles = localStorage.getItem('articles');
+            const savedUsers = localStorage.getItem('users');
+            const savedCurrentUser = localStorage.getItem('currentUser');
+            const savedEarningsClaimed = localStorage.getItem('earningsClaimed');
+            
+            if (savedArticles) {
+                articles = JSON.parse(savedArticles);
+            }
+            
+            if (savedUsers) {
+                users = JSON.parse(savedUsers);
+            }
+            
+            if (savedCurrentUser) {
+                currentUser = JSON.parse(savedCurrentUser);
+                updateUIForLoggedInUser();
+            }
+            
+            if (savedEarningsClaimed) {
+                earningsClaimed = JSON.parse(savedEarningsClaimed);
+            }
+            
+            renderArticles();
+            updateStats();
+        }
+        
+        // Save data to localStorage
+        function saveData() {
+            localStorage.setItem('articles', JSON.stringify(articles));
+            localStorage.setItem('users', JSON.stringify(users));
+            if (currentUser) {
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            } else {
+                localStorage.removeItem('currentUser');
+            }
+            localStorage.setItem('earningsClaimed', JSON.stringify(earningsClaimed));
+        }
+        
+        // Update UI for logged in user
+        function updateUIForLoggedInUser() {
+            if (currentUser) {
+                signupBtn.textContent = `Welcome, ${currentUser.name}`;
+                signupBtn.disabled = true;
+                writeBtn.disabled = false;
+                updateEarnButton(); // Check if earn button should be enabled
+            } else {
+                signupBtn.textContent = 'Sign Up';
+                signupBtn.disabled = false;
+                writeBtn.disabled = true;
+                earnBtn.disabled = true;
+            }
+        }
+        
+        // Update earn button based on stats
+        function updateEarnButton() {
+            if (!currentUser) {
+                earnBtn.disabled = true;
+                return;
+            }
+            
+            // If earnings already claimed, keep button disabled
+            if (earningsClaimed) {
+                earnBtn.disabled = true;
+                return;
+            }
+            
+            // Calculate user's stats
+            let userViews = 0;
+            let userTime = 0;
+            
+            articles.forEach(article => {
+                if (article.authorId === currentUser.id) {
+                    userViews += article.views || 0;
+                    userTime += article.timeSpent || 0;
+                }
+            });
+            
+            // Calculate earnings (example: $0.0001 per view + $0.00001 per second)
+            const earnings = (userViews * 0.0001) + (userTime * 0.00001);
+            
+            // Enable earn button if $0.30 reached
+            if (earnings >= 0.30) {
+                earnBtn.disabled = false;
+            } else {
+                earnBtn.disabled = true;
+            }
+            
+            // Update progress bar
+            const progress = Math.min(100, (earnings / 0.30) * 100);
+            progressFill.style.width = progress + '%';
+            progressText.textContent = `$${earnings.toFixed(4)} / $0.30`;
+        }
+        
+        // Update statistics display
+        function updateStats() {
+            if (!currentUser) return;
+            
+            // Calculate user's stats
+            let userViews = 0;
+            let userTime = 0;
+            let userArticleCount = 0;
+            
+            articles.forEach(article => {
+                if (article.authorId === currentUser.id) {
+                    userViews += article.views || 0;
+                    userTime += article.timeSpent || 0;
+                    userArticleCount++;
+                }
+            });
+            
+            totalViews.textContent = userViews;
+            totalTime.textContent = Math.round(userTime);
+            totalArticles.textContent = userArticleCount;
+            
+            // Update earn button status
+            updateEarnButton();
+        }
+        
+        // Render articles to the page
+        function renderArticles() {
+            if (articles.length === 0) {
+                articlesContainer.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No articles yet</h3>
+                        <p>Be the first to publish an article! Sign up to get started.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            articlesContainer.innerHTML = '';
+            
+            // Sort articles by date (newest first)
+            articles.slice().reverse().forEach(article => {
+                // Initialize stats if they don't exist
+                if (!article.views) article.views = 0;
+                if (!article.timeSpent) article.timeSpent = 0;
+                
+                const articleElement = document.createElement('div');
+                articleElement.className = 'article';
+                articleElement.innerHTML = `
+                    <h3 class="article-title">${article.title}</h3>
+                    <div class="article-content-preview article-content">${article.content.replace(/\n/g, '<br>')}</div>
+                    <div class="article-meta">
+                        Published on ${article.date}
+                    </div>
+                `;
+                
+                // Add click event to view full article
+                articleElement.addEventListener('click', () => {
+                    showFullArticle(article);
+                });
+                
+                articlesContainer.appendChild(articleElement);
+            });
+        }
+        
+        // Show full article view
+        function showFullArticle(article) {
+            currentArticle = article;
+            
+            // Update stats
+            article.views = (article.views || 0) + 1;
+            saveData();
+            
+            // Set start time for time tracking
+            startTime = new Date();
+            
+            fullArticleTitle.textContent = article.title;
+            fullArticleContent.textContent = article.content;
+            fullArticleMeta.textContent = `Published on ${article.date}`;
+            
+            articlesSection.style.display = 'none';
+            fullArticleView.style.display = 'block';
+            
+            // Update time spent every second
+            const timeInterval = setInterval(() => {
+                if (fullArticleView.style.display === 'block' && startTime) {
+                    const currentTime = new Date();
+                    const timeDiff = (currentTime - startTime) / 1000; // in seconds
+                    article.timeSpent = (article.timeSpent || 0) + timeDiff;
+                    startTime = currentTime; // Reset start time
+                    saveData();
+                }
+            }, 1000);
+            
+            // Clear interval when leaving the page
+            const checkDisplay = setInterval(() => {
+                if (fullArticleView.style.display !== 'block') {
+                    clearInterval(timeInterval);
+                    clearInterval(checkDisplay);
+                }
+            }, 1000);
+        }
+        
+        // Show articles list
+        function showArticles() {
+            formContainer.style.display = 'none';
+            articlesSection.style.display = 'block';
+            fullArticleView.style.display = 'none';
+            renderArticles(); // Refresh to show updated stats
+        }
+        
+        // Show form to write article
+        function showWriteForm() {
+            updateStats(); // Update stats before showing form
+            formContainer.style.display = 'block';
+            articlesSection.style.display = 'none';
+            fullArticleView.style.display = 'none';
+        }
+        
+        // Show earn modal
+        function showEarnModal() {
+            earnModal.style.display = 'flex';
+        }
+        
+        // Copy email to clipboard
+        function copyEmail() {
+            const email = "p11328995@gmail.com";
+            navigator.clipboard.writeText(email).then(() => {
+                // Show copy message
+                copyMessage.style.opacity = '1';
+                
+                // Hide message after 2 seconds
+                setTimeout(() => {
+                    copyMessage.style.opacity = '0';
+                }, 2000);
+                
+                // Lock the earn button
+                earningsClaimed = true;
+                earnBtn.disabled = true;
+                saveData();
+                
+                // Close modal after 1 second
+                setTimeout(() => {
+                    earnModal.style.display = 'none';
+                }, 1000);
+            });
+        }
+        
+        // Show auth modal
+        function showAuthModal(isLogin = false) {
+            if (isLogin) {
+                modalTitle.textContent = 'Login';
+                authName.closest('.form-group').style.display = 'none';
+                authSubmitBtn.textContent = 'Login';
+                switchToLogin.textContent = 'Sign up instead';
+                switchToLogin.onclick = () => showAuthModal(false);
+            } else {
+                modalTitle.textContent = 'Sign Up';
+                authName.closest('.form-group').style.display = 'block';
+                authSubmitBtn.textContent = 'Sign Up';
+                switchToLogin.textContent = 'Login instead';
+                switchToLogin.onclick = () => showAuthModal(true);
+            }
+            
+            authModal.style.display = 'flex';
+        }
+        
+        // Close modals
+        function closeAuthModal() {
+            authModal.style.display = 'none';
+            authName.value = '';
+            authEmail.value = '';
+            authPassword.value = '';
+        }
+        
+        function closeEarnModalFunc() {
+            earnModal.style.display = 'none';
+        }
+        
+        // Submit article handler
+        function submitArticle() {
+            const title = titleInput.value.trim();
+            const content = contentInput.value.trim();
+            
+            if (!title || !content) {
+                alert('Please fill in both title and content');
+                return;
+            }
+            
+            // Create article object with initial stats
+            const article = {
+                id: Date.now(),
+                title: title,
+                content: content,
+                date: new Date().toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                }),
+                views: 0,
+                timeSpent: 0,
+                authorId: currentUser.id
+            };
+            
+            // Add to articles array
+            articles.push(article);
+            
+            // Save and render
+            saveData();
+            
+            // Clear form
+            titleInput.value = '';
+            contentInput.value = '';
+            
+            // Show articles list
+            showArticles();
+            updateStats(); // Update stats after publishing
+        }
+        
+        // Auth submit handler
+        function handleAuthSubmit() {
+            const name = authName.value.trim();
+            const email = authEmail.value.trim();
+            const password = authPassword.value.trim();
+            
+            if (modalTitle.textContent === 'Sign Up') {
+                // Sign up
+                if (!name || !email || !password) {
+                    alert('Please fill in all fields');
+                    return;
+                }
+                
+                // Check if user already exists
+                if (users.some(user => user.email === email)) {
+                    alert('User with this email already exists');
+                    return;
+                }
+                
+                // Create new user
+                const newUser = {
+                    id: Date.now(),
+                    name: name,
+                    email: email,
+                    password: password // In a real app, this should be hashed
+                };
+                
+                users.push(newUser);
+                currentUser = newUser;
+            } else {
+                // Login
+                if (!email || !password) {
+                    alert('Please fill in all fields');
+                    return;
+                }
+                
+                // Find user
+                const user = users.find(u => u.email === email && u.password === password);
+                if (!user) {
+                    alert('Invalid email or password');
+                    return;
+                }
+                
+                currentUser = user;
+            }
+            
+            // Save and update UI
+            saveData();
+            updateUIForLoggedInUser();
+            closeAuthModal();
+        }
+        
+        // Event Listeners
+        signupBtn.addEventListener('click', () => showAuthModal(false));
+        writeBtn.addEventListener('click', showWriteForm);
+        earnBtn.addEventListener('click', showEarnModal);
+        backBtn.addEventListener('click', showArticles);
+        backToArticlesBtn.addEventListener('click', showArticles);
+        submitBtn.addEventListener('click', submitArticle);
+        closeModal.addEventListener('click', closeAuthModal);
+        closeEarnModal.addEventListener('click', closeEarnModalFunc);
+        authSubmitBtn.addEventListener('click', handleAuthSubmit);
+        userEmailDisplay.addEventListener('click', copyEmail);
+        
+        // Close modals when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === authModal) {
+                closeAuthModal();
+            }
+            if (e.target === earnModal) {
+                closeEarnModalFunc();
+            }
+        });
+        
+        // Initialize
+        loadData();
+    </script>
+</body>
+</html>
